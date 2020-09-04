@@ -142,8 +142,8 @@ def main():
         file_bytes = f.read()
         i = 1
         for part in range(0,len(file_bytes),126):
-            print("[*] 'd{n}.txt.yourzone.tk.' = {txt}".format(n=i, txt=file_bytes[part:part+127].hex()))
-            records[ DomainName('d%d.txt.yourzone.tk.' % i) ] = [TXT("?" + file_bytes[part:part+127].hex())]
+            print("[*] 'd{n}.txt.yourzone.tk.' = {txt}".format(n=i, txt=file_bytes[part:part+126].hex()))
+            records[ DomainName('d%d.txt.yourzone.tk.' % i) ] = [TXT("?" + file_bytes[part:part+126].hex())]
             i += 1
 
     print("Starting nameserver...")
