@@ -1,3 +1,5 @@
+# GPL
+
 Correct `yourzone.tk`.
 
 ### infiltration
