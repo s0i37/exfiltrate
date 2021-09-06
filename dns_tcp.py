@@ -24,9 +24,10 @@ class DomainName(str):
         return DomainName(item + '.' + self)
 
 
-D = DomainName('txt.yourzone.tk.')
+TXT_SIZE = int(250/2)
+D = DomainName('s0i37.ga.')
 IP = '10.0.0.1'
-TTL = 60 * 5
+TTL = 1
 datas = {}
 socks = {}
 new_connection = False
@@ -62,50 +63,58 @@ def dns_response(data):
 
     qname = request.q.qname
     qn = str(qname)
-    if qn.find(".txt.yourzone.tk") != -1:
-        if qn.split(".")[0].startswith("s"):
-            pos,size,data,sock = qn.split(".")[:4]
-            pos = int(pos[1:])
-            size = int(size)
-            if size > 0:
-                data = bytes.fromhex(data)
+    if qn.find("s0i37.ga") != -1:
+        try:
+            if qn.split(".")[1].startswith("s"):
+                rand,pos,size,data,sock = qn.split(".")[:5]
+                pos = int(pos[1:])
+                size = int(size)
+                if size > 0:
+                    data = bytes.fromhex(data)
 
-                if not sock in datas:
-                    new_connection = True
-                    datas[sock] = {"size": None, "input": {}, "output": {}}
+                    if not sock in datas:
+                        new_connection = True
+                        datas[sock] = {"size": None, "input": {}, "output": {}, "prev": None}
+
+                    if not sock in socks and last_socket:
+                        socks[last_socket] = sock
+                        last_socket = None
+
+                    datas[sock]["size"] = size
+                    if len(b"".join(datas[sock]["input"].values())) == pos:
+                        datas[sock]["input"][pos] = data
+                else:
+                    datas[sock]["size"] = -1
+                records[DomainName(qn)] = [A("127.0.0.1")]
+                print(f"[*] {qn}")
+
+            elif qn.split(".")[1].startswith("r"):
+                rand,pos,sock = qn.split(".")[:3]
+                pos = int(pos[1:])
 
                 if not sock in socks and last_socket:
                     socks[last_socket] = sock
                     last_socket = None
 
-                datas[sock]["size"] = size
-                datas[sock]["input"][pos] = data
-            else:
-                datas[sock]["size"] = -1
-            records[DomainName(qn)] = [A("127.0.0.1")]
-            print(f"[*] {qn}")
+                if not sock in datas:
+                    new_connection = True
+                    datas[sock] = {"size": None, "input": {}, "output": {}, "prev": None}
+                    
+                if datas[sock]["size"] == -1:
+                    answer = "-"
+                elif pos in datas[sock]["output"]:
+                    answer = datas[sock]["output"][pos].hex()
+                else:
+                    answer = ""
+                records[DomainName(qn)] = [TXT(answer)]
 
-        elif qn.split(".")[0].startswith("r"):
-            pos,sock = qn.split(".")[:2]
-            pos = int(pos[1:])
-
-            if not sock in socks and last_socket:
-                socks[last_socket] = sock
-                last_socket = None
-
-            if not sock in datas:
-                new_connection = True
-                datas[sock] = {"size": None, "input": {}, "output": {}}
+                if datas[sock]["prev"] != None and datas[sock]["prev"] != pos and datas[sock]["prev"] in datas[sock]["output"]:
+                    del( datas[sock]["output"][ datas[sock]["prev"] ] )
+                datas[sock]["prev"] = pos
                 
-            if datas[sock]["size"] == -1:
-                answer = "-"
-            elif pos in datas[sock]["output"]:
-                answer = datas[sock]["output"][pos].hex()
-                del(datas[sock]["output"][pos])
-            else:
-                answer = ""
-            records[DomainName(qn)] = [TXT(answer)]
-            print(f"[*] {qn} {answer}")
+                print(f"[*] {qn} {answer}")
+        except Exception as e:
+            pass
 
     qtype = request.q.qtype
     qt = QTYPE[qtype]
@@ -196,7 +205,6 @@ def tcp_send(sock): # dns_recv
 def tcp_recv(sock): # dns_send
     global datas, socks
     buf = ""
-    FRAG = int(250/2)
     while True:
         try:
             if not buf:
@@ -208,8 +216,8 @@ def tcp_recv(sock): # dns_send
                         break
                     if not datas[socks[sock]]["output"].keys():
                         print(f"[+] <- {buf.hex()}")
-                        for p in range(0, len(buf), FRAG):
-                            datas[socks[sock]]["output"][p] = buf[p:p+FRAG]
+                        for p in range(0, len(buf), TXT_SIZE):
+                            datas[socks[sock]]["output"][p] = buf[p:p+TXT_SIZE]
                         buf = ""
                 else:
                     print("[*] connection closed, no data")
@@ -225,7 +233,7 @@ def _listen(port):
     global last_socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind(("0.0.0.0", port))
+    s.bind(("172.16.0.1", port))
     s.listen(10)
     while True:
         c,info = s.accept()

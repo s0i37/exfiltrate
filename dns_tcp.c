@@ -7,7 +7,6 @@
 
 #define BUF_SIZE 1024
 #define MAX_CON 10
-#define ZONE "txt.yourzone.tk"
 #define TIMEOUT 100
 #define DNS_SIZE 50
 
@@ -16,6 +15,7 @@ cl /c dns_tcp.c
 link /out:dns_tcp.exe dns_tcp.obj ws2_32.lib dnsapi.lib
 */
 
+char *zone;
 int new_connection = 1;
 int timeout;
 int dns_size;
@@ -45,18 +45,18 @@ void dns_send(char *buf, int buf_size, int socket)
     if(buf_size == 0)
     {
     	memset(dns, '\x00', 1000);
-    	sprintf(dns, "s%d.%d.00.%d.%s", bytes, buf_size, socket, ZONE);
+    	sprintf(dns, "s%d.%d.00.%d.%s", bytes, buf_size, socket, zone);
     	DnsQuery(dns, DNS_TYPE_A, DNS_QUERY_BYPASS_CACHE, (PIP4_ARRAY)0, &pDnsRecord, 0);
     }
     while(pos < buf_size)
 	{
 		j = 0;
 		memset(dns, '\x00', 1000);
-		j += sprintf(dns, "s%d.%d.", bytes, buf_size);
+		j += sprintf(dns, "%d.s%d.%d.", rand(), bytes, buf_size);
 		for(i = 0; (i < dns_size && pos < buf_size); i++, pos++)
 			j += sprintf(dns+j, "%02x", (unsigned char)buf[pos]);
 		j += sprintf(dns+j, ".%d", socket);
-		sprintf(dns+j, ".%s", ZONE);
+		sprintf(dns+j, ".%s", zone);
 		printf("[+] -> %s\n", dns);
 		while(1)
 		{
@@ -93,7 +93,7 @@ int dns_recv(char *buf, int buf_size, int socket)
     while(pos < buf_size)
     {
     	memset(dns, '\x00', 100);
-    	sprintf(dns, "r%d.%d.%s", pos, socket, ZONE);
+    	sprintf(dns, "%d.r%d.%d.%s", rand(), pos, socket, zone);
 
     	while(1)
     	{
@@ -160,6 +160,7 @@ void _recv(int * socket)
 	char buf[BUF_SIZE];
 	int buf_size;
 	int is_new = 1;
+	srand(time(0));
 	while(1)
 	{
 		if(! *socket)
@@ -284,6 +285,7 @@ void main(int argc, char **argv)
 	char *ip;
 	int port;
 
+	zone = getenv("ZONE");
 	timeout = getenv("TIMEOUT") ? atoi(getenv("TIMEOUT")) : TIMEOUT;
 	dns_size = (getenv("DNS_SIZE") ? atoi(getenv("DNS_SIZE")) : DNS_SIZE)/2;
 	mode = argv[1][0];
