@@ -1,10 +1,6 @@
 #!/usr/bin/python3
-from PIL import Image
-from pyzbar import pyzbar
 from os import system
 from struct import unpack
-
-#https://github.com/NaturalHistoryMuseum/pyzbar/pull/76/commits/62401e85d08b097da5011180bf32f5e8683dcb80
 
 TIMEOUT = 1
 system("xwininfo | grep id | grep 'xwininfo:' | awk '{print $4}' > /tmp/winid.txt")

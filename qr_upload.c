@@ -3,25 +3,43 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "qrcodegen.h"
-#include <windows.h>
+#include "lib/qrcodegen.h" // https://github.com/nayuki/QR-Code-generator
+#if defined(_WIN32) || defined(_WIN64)
+	#include <windows.h>
+#elif defined(__i386__) || defined(__x86_64__)
+	#include <unistd.h>
+#endif
 
 /*
-https://github.com/nayuki/QR-Code-generator
+cl /c lib\qrcodegen.c
 cl /c qr_upload.c
-cl /c qrcodegen.c
 link /out:qr_upload.exe qr_upload.obj qrcodegen.obj
 chcp 866
 */
 
+/*
+gcc -c lib/qrcodegen.c
+gcc -c qr_upload.c
+gcc qr_upload.c qrcodegen.o -o qr_upload
+setterm -background white
+setterm -foreground black
+*/
+
 int buf_size;
+#if defined(__i386__) || defined(__x86_64__)
+	#define PXL_BLACK "\xe2\x96\x88\xe2\x96\x88"
+	#define PXL_WHITE "  "
+#elif defined(_WIN32) || defined(_WIN64)
+	#define PXL_BLACK "\xdb\xdb"
+	#define PXL_WHITE "  "
+#endif
 
 static void printQr(const uint8_t qrcode[]) {
 	int size = qrcodegen_getSize(qrcode);
-	int border = 4;
+	int border = 1;
 	for (int y = -border; y < size + border; y++) {
 		for (int x = -border; x < size + border; x++) {
-			fputs((qrcodegen_getModule(qrcode, x, y) ? "\xdb\xdb" : "  "), stdout);
+			fputs((qrcodegen_getModule(qrcode, x, y) ? PXL_BLACK : PXL_WHITE), stdout);
 		}
 		fputs("\n", stdout);
 	}
@@ -67,8 +85,13 @@ int main(int argc, char **argv) {
 		*((short *)buf) = num;
 		len = fread(buf+2, 1, buf_size-2, f);
 		qrcode(buf, len);
-		Sleep(timeout);
-		system("cls");
+		#if defined(__i386__) || defined(__x86_64__)
+			usleep(timeout*1000);
+			system("clear");
+		#elif defined(_WIN32) || defined(_WIN64)
+			Sleep(timeout);
+			system("cls");
+		#endif
 		memset(buf, '\x00', buf_size);
 		num++;
 	}
