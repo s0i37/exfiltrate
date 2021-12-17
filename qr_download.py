@@ -12,7 +12,7 @@ errors = 0
 _num = 0
 try:
 	while True:
-		system(f"gm import -window {winid} /tmp/qr.png")
+		system(f"gm import -window {winid} /tmp/qr.png") # apt install graphicsmagick
 		system("zbarimg --raw --oneshot -Sbinary /tmp/qr.png > /tmp/qr-decoded.bin 2> /dev/null") # apt install zbar-tools
 		data = open("/tmp/qr-decoded.bin", "rb").read()
 		if data:
