@@ -1,7 +1,7 @@
 #!/bin/bash
 
-winid=$(xwininfo | grep id | grep 'xwininfo:' | awk '{print $4}')
-xdotool windowfocus $winid
+[[ $# -ge 1 ]] && winid="$1" || winid=$(xwininfo | grep id | grep 'xwininfo:' | awk '{print $4}')
+xdotool windowfocus "$winid"
 
 LANG=C IFS=
 while read -r -d '' -n 1 char
