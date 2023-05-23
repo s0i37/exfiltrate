@@ -59,7 +59,7 @@ def dns_response(data):
     reply = DNSRecord(DNSHeader(id=request.header.id, qr=1, aa=1, ra=1), q=request.q)
 
     qname = request.q.qname
-    qn = str(qname)
+    qn = str(qname).lower()
     if qn.find(".yourzone.tk") != -1:
         try:
             pos,content,_,_,_ = qn.split(".")

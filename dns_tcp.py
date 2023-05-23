@@ -25,7 +25,7 @@ class DomainName(str):
 
 
 TXT_SIZE = int(250/2)
-D = DomainName('s0i37.ga.')
+D = DomainName('yourzone.tk.')
 IP = '10.0.0.1'
 TTL = 1
 datas = {}
@@ -62,8 +62,8 @@ def dns_response(data):
     reply = DNSRecord(DNSHeader(id=request.header.id, qr=1, aa=1, ra=1), q=request.q)
 
     qname = request.q.qname
-    qn = str(qname)
-    if qn.find("s0i37.ga") != -1:
+    qn = str(qname).lower()
+    if qn.find(".yourzone.tk") != -1:
         try:
             if qn.split(".")[1].startswith("s"):
                 rand,pos,size,data,sock = qn.split(".")[:5]
