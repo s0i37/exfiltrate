@@ -11,6 +11,7 @@ do
 	then xdotool key Return
 	else xdotool type "$char"
 	fi
+	#sleep 0.1
 done
 
 #while read line

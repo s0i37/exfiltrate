@@ -20,8 +20,8 @@ class DomainName(str):
     def __getattr__(self, item):
         return DomainName(item + '.' + self)
 
-
-D = DomainName('yourzone.tk.')
+TLDN = "yourzone.tk"
+D = DomainName('{tldn}.'.format(tldn=TLDN))
 IP = '127.0.0.1'
 TTL = 60 * 5
 
@@ -61,13 +61,17 @@ def dns_response(data):
 
     if qn == D or qn.endswith('.' + D):
 
+        is_exist = False
         for name, rrs in records.items():
             if name == qn:
+                is_exist = True
                 for rdata in rrs:
                     rqt = rdata.__class__.__name__
                     if qt in ['*', rqt]:
                         reply.add_answer(RR(rname=qname, rtype=getattr(QTYPE, rqt), rclass=1, ttl=TTL, rdata=rdata))
                         print(rdata, end="")
+        if qt == "TXT" and not is_exist:
+            reply.add_answer(RR(rname=qname, rtype=QTYPE.TXT, rclass=1, ttl=TTL, rdata=TXT("?")))
 
         for rdata in ns_records:
             reply.add_ar(RR(rname=D, rtype=QTYPE.NS, rclass=1, ttl=TTL, rdata=rdata))
@@ -142,8 +146,8 @@ def main():
         file_bytes = f.read()
         i = 1
         for part in range(0,len(file_bytes),126):
-            print("[*] 'd{n}.txt.yourzone.tk.' = {txt}".format(n=i, txt=file_bytes[part:part+126].hex()))
-            records[ DomainName('d%d.txt.yourzone.tk.' % i) ] = [TXT("?" + file_bytes[part:part+126].hex())]
+            print("[*] 'd{n}.txt.{tldn}.' = {txt}".format(n=i, tldn=TLDN, txt=file_bytes[part:part+126].hex()))
+            records[ DomainName('d{n}.txt.{tldn}.'.format(n=i, tldn=TLDN)) ] = [TXT("?" + file_bytes[part:part+126].hex())]
             i += 1
 
     print("Starting nameserver...")

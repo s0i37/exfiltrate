@@ -20,9 +20,9 @@ class DomainName(str):
     def __getattr__(self, item):
         return DomainName(item + '.' + self)
 
-
-D = DomainName('yourzone.tk.')
-d = DomainName('*.yourzone.tk.')
+TLDN = "yourzone.tk"
+D = DomainName('{tldn}.'.format(tldn=TLDN))
+d = DomainName('*.{tldn}.'.format(tldn=TLDN))
 IP = '127.0.0.1'
 TTL = 60 * 5
 out = None
@@ -60,7 +60,7 @@ def dns_response(data):
 
     qname = request.q.qname
     qn = str(qname).lower()
-    if qn.find(".yourzone.tk") != -1:
+    if qn.find(".{tldn}".format(tldn=TLDN)) != -1:
         try:
             pos,content,_,_,_ = qn.split(".")
             pos = int(pos)
